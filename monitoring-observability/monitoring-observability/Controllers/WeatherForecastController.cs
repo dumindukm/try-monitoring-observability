@@ -42,9 +42,26 @@ namespace monitoring_observability.Controllers
         [HttpGet]
         public IEnumerable<WeatherForecast> Get()
         {
+            _logger.LogInformation("Getting weather initiated");
             weatherForecastcounter.Inc();
             JobsInQueue.Inc();
             var rng = new Random();
+
+            try
+            {
+                var rng1 = new Random();
+                int number = rng1.Next(1, 50);
+                if ( number< 20)
+                {
+                    throw new Exception(string.Format("random number {0}", number));
+                }
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "Get waeter error occurred");
+            }
+
+
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
                 Date = DateTime.Now.AddDays(index),
@@ -58,6 +75,7 @@ namespace monitoring_observability.Controllers
         [Route("track_input")]
         public string TrackInput(int number)
         {
+            _logger.LogInformation("track inputs initiated");
             // to mimic summary metric
             RequestSizeSummary.Observe(number);
             // to mimic histrogram metric
